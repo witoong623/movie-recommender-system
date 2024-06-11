@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from common.models import create_session, Rating
+from common.models import create_session, Rating, Movie
 from recommender.base import Recommender
 from recommender.item_based_cf import ItemBasedCF
 
@@ -37,9 +37,20 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/recommendations")
 def get_recommendations(user_id: int, returnMetadata: bool=False,
                         db: Session=Depends(get_db)):
-    
-    recommended_movies = recommend_engine.get_recommended_movies(user_id, LIMIT)
-    return {'items': [{'id': movie_id} for movie_id, _ in recommended_movies]}
+
+    predicted_rating = recommend_engine.get_recommended_movies(user_id, LIMIT)
+
+    if returnMetadata:
+        stmt = select(Movie).where(Movie.id.in_([movie_id for movie_id, _ in predicted_rating]))
+        ret = db.execute(stmt)
+        predicted_rating = dict(predicted_rating)
+        to_sort_objs = [(movie, predicted_rating[movie.id]) for movie in ret.scalars()]
+        sorted_movies = sorted(to_sort_objs, key=lambda x: x[1], reverse=True)
+        returned_obj = {'items': [{'id': movie.id, 'title': movie.title, 'genres': movie.genres.split('|')} for movie, _ in sorted_movies]}
+    else:
+        returned_obj = {'items': [{'id': movie_id} for movie_id, _ in predicted_rating]}
+
+    return returned_obj
 
 
 @app.get('/features')
