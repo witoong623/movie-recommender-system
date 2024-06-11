@@ -32,9 +32,46 @@ class ItemBasedCF(Recommender):
 
         self._rating_df: pd.DataFrame | None = None
         self._movie_sim_csr: csr_matrix | None = None
+        self._max_candidates = 500
 
     def get_recommended_movies(self, user_id: int, limit: int) -> list[int]:
-        pass
+        with create_session() as session:
+            ret = session.execute(select(Rating).where(Rating.user_id == user_id))
+            rated_movies = {rating.movie_id:rating.rating for rating in ret.scalars()}
+            rating_mean = sum(rated_movies.values()) / len(rated_movies)
+
+            stmt = (select(MovieSimilarity)
+                    .where(MovieSimilarity.source_id.in_(rated_movies.keys()),
+                           ~MovieSimilarity.target_id.in_(rated_movies.keys()),
+                           MovieSimilarity.similarity > self._min_sim)
+                    .order_by(MovieSimilarity.similarity.desc())
+                    .limit(self._max_candidates))
+            ret = session.execute(stmt)
+
+            movie_similarities = ret.scalars().all()
+        candidate_movies = {}
+
+        for movie_sim in movie_similarities:
+            target_id = movie_sim.target_id
+
+            rated_sim_sum = 0
+            sim_sum = 0
+
+            # movie that user watch that are similar to a target movie
+            sim_to_targets = [sim for sim in movie_similarities if sim.target_id == target_id]
+
+            if len(sim_to_targets) > 1:
+                for sim_to_target in sim_to_targets:
+                    normed_rating = rated_movies[sim_to_target.source_id] - rating_mean
+                    rated_sim_sum += sim_to_target.similarity * normed_rating
+                    sim_sum += sim_to_target.similarity
+
+                if sim_sum > 0:
+                    candidate_movies[target_id] = rating_mean + (rated_sim_sum / sim_sum)
+
+        sorted_candidates = sorted(candidate_movies.items(), key=lambda x: x[1], reverse=True)[:limit]
+
+        return sorted_candidates
 
     def build(self, **kwargs):
         with create_session() as session:

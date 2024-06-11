@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from common.models import create_session, Rating
 from recommender.base import Recommender
-from recommender.dummy import DummyRecommender
+from recommender.item_based_cf import ItemBasedCF
 
 
 LIMIT = 20
@@ -24,7 +24,7 @@ def get_db():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global recommend_engine
-    recommend_engine = DummyRecommender()
+    recommend_engine = ItemBasedCF()
     try:
         yield
     finally:
@@ -37,7 +37,9 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/recommendations")
 def get_recommendations(user_id: int, returnMetadata: bool=False,
                         db: Session=Depends(get_db)):
-    return {'items': [{'id': movie_id} for movie_id in recommend_engine.get_recommended_movies(user_id, LIMIT)]}
+    
+    recommended_movies = recommend_engine.get_recommended_movies(user_id, LIMIT)
+    return {'items': [{'id': movie_id} for movie_id, _ in recommended_movies]}
 
 
 @app.get('/features')
