@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import select
@@ -11,7 +10,7 @@ from recommender.item_based_cf import ItemBasedCF
 
 
 LIMIT = 20
-_recommend_engine: Recommender = None
+recommend_engine: Recommender = None
 
 
 def get_db():
@@ -22,28 +21,22 @@ def get_db():
         session.close()
 
 
-def get_recommended_engine():
-    return _recommend_engine
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _recommend_engine
-    _recommend_engine = ItemBasedCF()
+    global recommend_engine
+    recommend_engine = ItemBasedCF()
     try:
         yield
     finally:
-        _recommend_engine = None
+        recommend_engine = None
 
 
 app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/recommendations")
-def get_recommendations(user_id: int,
-                        db: Annotated[Session, Depends(get_db)],
-                        recommend_engine: Annotated[Recommender, Depends(get_recommended_engine)],
-                        returnMetadata: bool=False):
+def get_recommendations(user_id: int, returnMetadata: bool=False,
+                        db: Session=Depends(get_db)):
 
     predicted_rating = recommend_engine.get_recommended_movies(user_id, LIMIT)
 
