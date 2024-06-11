@@ -35,4 +35,14 @@ class Movie(Base):
     genres = mapped_column(String)
 
 
+class MovieSimilarity(Base):
+    ''' Similarity from source movie id to target movie id '''
+    __tablename__ = "movie_similarity"
+
+    id = mapped_column(Integer, primary_key=True)
+    source_id = mapped_column(Integer)
+    target_id = mapped_column(Integer)
+    similarity = mapped_column(Float)
+
+
 Base.metadata.create_all(bind=engine)
