@@ -1,8 +1,11 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import sessionmaker
 
 import api.main
+import common.models
 from recommender.base import Recommender
 
 
@@ -30,10 +33,40 @@ def mock_recommender(monkeypatch):
 
 @pytest.fixture
 def mock_db(monkeypatch):
-    pass
+    engine = create_engine('sqlite://', connect_args={'check_same_thread': False})
+    common.models.Base.metadata.create_all(bind=engine)
+
+    create_session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    session = create_session()
+
+    session.add_all([
+        common.models.Movie(id=1, title='Movie 1', genres='Action|Adventure'),
+        common.models.Movie(id=2, title='Movie 2', genres='Comedy|Drama'),
+    ])
+    session.commit()
+
+    monkeypatch.setattr(api.main, 'create_session', lambda: session)
+    # this make sure that table exist in memory
+    session.execute(select(common.models.Movie)).scalars().all()
+
+    yield
 
 
-def test_get_movie_id_success(mock_recommender):
+def test_get_movie_id_success(mock_recommender, mock_db):
     response = client.get('/recommendations?user_id=1')
 
-    assert response.json() == {'items': [{'id': 1}, {'id': 2}]}
+    expected_json = {'items': [{'id': 1}, {'id': 2}]}
+    assert response.json() == expected_json
+
+
+def test_get_movie_with_metadata_success(mock_recommender, mock_db):
+    response = client.get('/recommendations?user_id=1&returnMetadata=true')
+
+    expected_json = {
+        'items': [
+            {'id': 1, 'title': 'Movie 1', 'genres': ['Action', 'Adventure']},
+            {'id': 2, 'title': 'Movie 2', 'genres': ['Comedy', 'Drama']},
+        ]
+    }
+    assert response.json() == expected_json
+
