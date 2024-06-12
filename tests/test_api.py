@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
 import api.main
-import common.models
+from common.models import Base, Movie, Rating
 from recommender.base import Recommender
 
 
@@ -34,25 +34,25 @@ def mock_recommender(monkeypatch):
 @pytest.fixture
 def mock_db(monkeypatch):
     engine = create_engine('sqlite://', connect_args={'check_same_thread': False})
-    common.models.Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     create_session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = create_session()
 
     session.add_all([
-        common.models.Movie(id=1, title='Movie 1', genres='Action|Adventure'),
-        common.models.Movie(id=2, title='Movie 2', genres='Comedy|Drama'),
+        Movie(id=1, title='Movie 1', genres='Action|Adventure'),
+        Movie(id=2, title='Movie 2', genres='Comedy|Drama'),
 
-        common.models.Rating(user_id=1, movie_id=1, rating=5.0),
-        common.models.Rating(user_id=1, movie_id=2, rating=3.0),
-        common.models.Rating(user_id=2, movie_id=1, rating=4.0),
-        common.models.Rating(user_id=2, movie_id=2, rating=2.0),
+        Rating(user_id=1, movie_id=1, rating=5.0),
+        Rating(user_id=1, movie_id=2, rating=3.0),
+        Rating(user_id=2, movie_id=1, rating=4.0),
+        Rating(user_id=2, movie_id=2, rating=2.0),
     ])
     session.commit()
 
     monkeypatch.setattr(api.main, 'create_session', lambda: session)
     # this make sure that table exist in memory
-    session.execute(select(common.models.Movie)).scalars().all()
+    session.execute(select(Movie)).scalars().all()
 
     yield
 
