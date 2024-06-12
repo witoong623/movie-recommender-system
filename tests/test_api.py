@@ -42,6 +42,11 @@ def mock_db(monkeypatch):
     session.add_all([
         common.models.Movie(id=1, title='Movie 1', genres='Action|Adventure'),
         common.models.Movie(id=2, title='Movie 2', genres='Comedy|Drama'),
+
+        common.models.Rating(user_id=1, movie_id=1, rating=5.0),
+        common.models.Rating(user_id=1, movie_id=2, rating=3.0),
+        common.models.Rating(user_id=2, movie_id=1, rating=4.0),
+        common.models.Rating(user_id=2, movie_id=2, rating=2.0),
     ])
     session.commit()
 
@@ -70,3 +75,21 @@ def test_get_movie_with_metadata_success(mock_recommender, mock_db):
     }
     assert response.json() == expected_json
 
+
+def test_get_movie_not_exist_user(mock_recommender, mock_db):
+    response = client.get('/recommendations?user_id=3&returnMetadata=true')
+
+    assert response.status_code == 404
+
+
+def test_get_user_feature_success(mock_db):
+    response = client.get('/features?user_id=1')
+
+    expected_json = {'features': [{'histories': [1, 2]}]}
+    assert response.json() == expected_json
+
+
+def test_get_user_feature_not_exist_user(mock_db):
+    response = client.get('/features?user_id=3')
+
+    assert response.status_code == 404
