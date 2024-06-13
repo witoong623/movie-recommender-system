@@ -74,9 +74,21 @@ Please note that all data in the dataset is used to train the similarity matrix,
 ## Implementation detail
 - Data is required to be seed to database before serving REST API. Seeding including insert 
 - I chose to save similarity matrix in SQLite, and query only the relevant records during serving recommendation for memory efficiency.
-- One can implement new recommendation algorithm by implement abstract class `Recommender` to provide build and get recommendation results.
+- I use `SQLAlchemy` with ORM model and query functions to provide RDBMS-agnostic, allowing you to replace SQLite with different database.
+- To implement new recommender algorhtm
+    - Implement abstract class `Recommender` to provide new recommender algorithm.
+    - Register the new recommender using `register_recommender` function.
+    - Provide config using the same format as `config/item-based-cf.yaml`.
 
-## Running the REST API server
+## Running locally
+Highly recommend to create new virtual environment before installing packages.
+
+Run `pip install -r requirements.txt` to install packages. Use `fastapi dev api/main.py` command to start development server.
+
+### Running tests
+Run `pytest tests` to run all tests.
+
+## Running REST API server in docker (recommend for trying API)
 API server is dockerized and can be run using the following docker compose command: `docker compose -f docker/docker-compose.yaml up -d`.
 
 The container will seed the database, calculate similrity matrix and serve API using FastAPI CLI.
