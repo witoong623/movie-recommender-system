@@ -156,3 +156,35 @@ class ItemBasedCF(Recommender):
 
     def load(self, **kwargs):
         pass
+
+    def predict_rating(self, user_id: int, movie_id: int) -> float:
+        ''' Predict rating of a movie for a user '''
+        with create_session() as session:
+            stmt = (select(Rating)
+                    .where(Rating.user_id == user_id, Rating.movie_id != movie_id)
+                    .order_by(Rating.rating.desc()))
+            ret = session.execute(stmt)
+
+            rated_movies = {rating.movie_id:rating.rating for rating in ret.scalars()}
+
+            stmt = (select(MovieSimilarity)
+                    .where(MovieSimilarity.source_id.in_(rated_movies.keys()),
+                           ~MovieSimilarity.target_id != movie_id)
+                    .order_by(MovieSimilarity.similarity.desc())
+                    .limit(self._max_candidates))
+            ret = session.execute(stmt)
+
+            movie_similarities = ret.scalars().all()
+
+        if len(movie_similarities) == 0:
+            return 0.0
+
+        rated_sim_sum = 0
+        sim_sum = 0
+
+        for movie_sim in movie_similarities:
+            rating = rated_movies[movie_sim.source_id]
+            rated_sim_sum += movie_sim.similarity * rating
+            sim_sum += movie_sim.similarity
+
+        return rated_sim_sum / sim_sum

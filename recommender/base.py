@@ -22,3 +22,7 @@ class Recommender(abc.ABC):
     def load(self, **kwargs):
         ''' Load state of Recommender, so that it is ready to be used for inference '''
         pass
+
+    def predict_rating(self, user_id: int, movie_id: int) -> float:
+        ''' Predict rating of a movie for a user '''
+        return 0.0
