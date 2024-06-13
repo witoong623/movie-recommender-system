@@ -1,0 +1,10 @@
+name: movie-recommender
+
+services:
+  api-server:
+    image: movie-recommender:prod
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile
+    ports:
+      - 8000:8000
