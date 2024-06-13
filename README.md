@@ -1,6 +1,9 @@
 # MovieLens recommender system
 This repository contains a recommender system which work on a [small subset of MovieLense dataset](https://github.com/lukkiddd-tdg/movielens-small).
 ## Taking a look at data
+You can see data exploration jupyter notebook in notebook directory.
+
+In the full dataset, there are 27,278 movies and 138,493 users in dataset. Each user has rated at least 20 movies same as this dataset.
 ## Personalized recommender
 This recommender goals is to predict rating that a user would give to movies that they have not watched, and then recommend top-N highest rating to the user.
 
