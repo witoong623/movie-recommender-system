@@ -79,6 +79,9 @@ Please note that all data in the dataset is used to train the similarity matrix,
     - Implement abstract class `Recommender` to provide new recommender algorithm.
     - Register the new recommender using `register_recommender` function.
     - Provide config using the same format as `config/item-based-cf.yaml`.
+    - Set environment variable `CONFIG` to the new config before running the server.
+- To seed DB run `python -m tools.seed_db`.
+- To "train" item-based collaborative recommender, run `python -m tools.train_item_based_cf`
 
 ## Running locally
 Highly recommend to create new virtual environment before installing packages.
@@ -94,8 +97,9 @@ API server is dockerized and can be run using the following docker compose comma
 The container will seed the database, calculate similrity matrix and serve API using FastAPI CLI.
 
 ## How to play with API
-Open browser and go to `http://localhost:8000/docs` to use interactive API docs (from swagger UI).
-In this page you can select API that you want to test, enter user ID and get the recommended movies.
+Open browser and go to `http://localhost:8000/docs` to use interactive API docs (from swagger UI), more detail can be found [here](https://fastapi.tiangolo.com/#interactive-api-docs).
+
+In this page you can select API that you want to test, enter user ID and get the recommended movies or features.
 
 ## How to improve the recommender system
 - When a user just start using the system, there isn't enough movie watching history to predict the rating of the movie to recommend to them. One can use non-personalized recommender system to recooomend e.g. recommmend popular movie recently. The system become hybrid recommender system.
