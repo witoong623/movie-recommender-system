@@ -5,7 +5,7 @@ from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
 from common.models import create_session, Rating, Movie
-from recommender.base import Recommender
+from recommender.base import Recommender, get_recommender_from_config
 from recommender.item_based_cf import ItemBasedCF
 
 
@@ -24,7 +24,7 @@ def get_db():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global recommend_engine
-    recommend_engine = ItemBasedCF()
+    recommend_engine = get_recommender_from_config({'name': 'ItemBasedCF', 'params': {}})
     try:
         yield
     finally:

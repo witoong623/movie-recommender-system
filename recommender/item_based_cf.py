@@ -5,7 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sqlalchemy import select, delete, func
 
 from common.models import create_session, MovieSimilarity, Rating
-from recommender.base import Recommender
+from recommender.base import Recommender, register_recommender
 
 
 def normalize(x):
@@ -188,3 +188,6 @@ class ItemBasedCF(Recommender):
             sim_sum += movie_sim.similarity
 
         return rated_sim_sum / sim_sum
+
+
+register_recommender('ItemBasedCF', ItemBasedCF)
