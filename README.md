@@ -4,6 +4,8 @@ This repository contains a recommender system which work on a [small subset of M
 You can see data exploration jupyter notebook in notebook directory.
 
 In the full dataset, there are 27,278 movies and 138,493 users in dataset. Each user has rated at least 20 movies same as this dataset.
+
+<u>I will only use rating and movie data, but not the tags and links.</u>
 ## Personalized recommender
 This recommender goals is to predict rating that a user would give to movies that they have not watched, and then recommend top-N highest rating to the user.
 
@@ -47,6 +49,7 @@ I use movie similarity matrix to find that. I consider the movie to be similar t
 
 I also sort the results based on similarity in descending order, and select the top N similarity that I will consider.
 
+<u>This step and next step onward, are done during serving recommendation.</u>
 ### 3. Predicting rating for similar movies
 Now, I have the following data
 - A set of movies similar to one of the movie the user has watched.
@@ -67,6 +70,10 @@ There are many ways to evaluate recommender system. One way is to find the error
 One can use `python -m tools.evaluate_user_recommendation --user-id <user id>` to find the MSE of specified user.
 
 Please note that all data in the dataset is used to train the similarity matrix, so this isn't a fair evaluation and for demonstration purpose only.
+
+## Implementation detail
+- Data is required to be seed to database before serving REST API. Seeding including insert 
+- I chose to save similarity matrix in SQLite, and query only the relevant records during serving recommendation for memory efficiency.
 
 ## Running the REST API server
 
