@@ -58,9 +58,20 @@ where $W$ is a set of movies that the user has watched and similar to a candidat
 ### 4. Return recommended movies
 After getting predicted rating for all candidate movies, I sort it based on predicted rating descending order, and return top N movies as recommended results.
 
+## Evaluating the recommender system
+There are many ways to evaluate recommender system. One way is to find the error between the predicted rating of a movie and the actual rating the the user gave.
+
+One can use `python -m tools.evaluate_user_recommendation --user-id <user id>` to find the MSE of specified user.
+
+Please note that all data in the dataset is used to train the similarity matrix, so this isn't a fair evaluation and for demonstration purpose only.
+
 ## Running the REST API server
 
 ## How to play with API
+Open browser and go to `http://localhost:8000/docs` to use interactive API docs (from swagger UI).
+In this page you can select API that you want to test, enter user ID and get the recommended movies.
 
 ## How to improve the recommender system
 - When a user just start using the system, there isn't enough movie watching history to predict the rating of the movie to recommend to them. One can use non-personalized recommender system to recooomend e.g. recommmend popular movie recently. The system become hybrid recommender system.
+- One can decide the method to do the evaluation and use it for regression test i.e. test after building recommender whether the recommnedation quality regress or not.
+- In order to fairly evaluate the recommender system, in my opinion, one should use A/B testing between 2 recommender systems and see how the user respond to the recommendation.
