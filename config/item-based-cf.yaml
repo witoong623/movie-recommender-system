@@ -1,0 +1,4 @@
+name: ItemBasedCF
+params:
+  min_overlap: 15
+  min_sim: 0.2

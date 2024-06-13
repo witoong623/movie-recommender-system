@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from scipy.sparse import coo_matrix, csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
@@ -26,9 +25,11 @@ def save_to_db(item_to_add):
 
 
 class ItemBasedCF(Recommender):
-    def __init__(self):
-        self._min_overlap = 15
-        self._min_sim = 0.2
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._min_overlap = kwargs.get('min_overlap', 15)
+        self._min_sim = kwargs.get('min_sim', 0.2)
 
         self._rating_df: pd.DataFrame | None = None
         self._movie_sim_csr: csr_matrix | None = None

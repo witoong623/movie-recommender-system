@@ -1,5 +1,7 @@
+import os
 from contextlib import asynccontextmanager
 
+import yaml
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
@@ -24,7 +26,12 @@ def get_db():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global recommend_engine
-    recommend_engine = get_recommender_from_config({'name': 'ItemBasedCF', 'params': {}})
+
+    with open(os.getenv('CONFIG', 'config/item-based-cf.yaml')) as f:
+        config = yaml.safe_load(f)
+
+    recommend_engine = get_recommender_from_config(config)
+
     try:
         yield
     finally:
