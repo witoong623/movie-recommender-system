@@ -95,12 +95,10 @@ class ItemBasedCF(Recommender):
         overlap_matrix = coo.astype(bool).astype(int).dot(coo.transpose().astype(bool).astype(int))
 
         number_of_overlaps = (overlap_matrix > self._min_overlap).count_nonzero()
-        print("Overlap matrix leaves {} out of {} with {}".format(number_of_overlaps,
-                                                                  overlap_matrix.count_nonzero(),
-                                                                  self._min_overlap))
+        print(f'Overlap matrix leaves {number_of_overlaps} out of '
+              f'{overlap_matrix.count_nonzero()} with {self._min_overlap}')
 
-        print("Rating matrix (size {}x{}) finished".format(coo.shape[0],
-                                                           coo.shape[1]))
+        print(f'Rating matrix (size {coo.shape[0]}x{coo.shape[1]}) finished')
 
         movie_sim_csr = cosine_similarity(coo, dense_output=False)
 
