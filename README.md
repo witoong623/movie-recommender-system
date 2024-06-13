@@ -57,3 +57,10 @@ where $W$ is a set of movies that the user has watched and similar to a candidat
 
 ### 4. Return recommended movies
 After getting predicted rating for all candidate movies, I sort it based on predicted rating descending order, and return top N movies as recommended results.
+
+## Running the REST API server
+
+## How to play with API
+
+## How to improve the recommender system
+- When a user just start using the system, there isn't enough movie watching history to predict the rating of the movie to recommend to them. One can use non-personalized recommender system to recooomend e.g. recommmend popular movie recently. The system become hybrid recommender system.
