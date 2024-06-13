@@ -86,7 +86,7 @@ Highly recommend to create new virtual environment before installing packages.
 Run `pip install -r requirements.txt` to install packages. Use `fastapi dev api/main.py` command to start development server.
 
 ### Running tests
-Run `pytest tests` to run all tests.
+Run `pytest tests` to run all tests. Tests including testing recommender and test REST API.
 
 ## Running REST API server in docker (recommend for trying API)
 API server is dockerized and can be run using the following docker compose command: `docker compose -f docker/docker-compose.yaml up -d`.

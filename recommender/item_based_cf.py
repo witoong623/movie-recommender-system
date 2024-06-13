@@ -39,6 +39,10 @@ class ItemBasedCF(Recommender):
         with create_session() as session:
             ret = session.execute(select(Rating).where(Rating.user_id == user_id))
             rated_movies = {rating.movie_id:rating.rating for rating in ret.scalars()}
+
+            if len(rated_movies) == 0:
+                return []
+
             rating_mean = sum(rated_movies.values()) / len(rated_movies)
 
             stmt = (select(MovieSimilarity)
