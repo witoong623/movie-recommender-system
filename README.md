@@ -74,8 +74,12 @@ Please note that all data in the dataset is used to train the similarity matrix,
 ## Implementation detail
 - Data is required to be seed to database before serving REST API. Seeding including insert 
 - I chose to save similarity matrix in SQLite, and query only the relevant records during serving recommendation for memory efficiency.
+- One can implement new recommendation algorithm by implement abstract class `Recommender` to provide build and get recommendation results.
 
 ## Running the REST API server
+API server is dockerized and can be run using the following docker compose command: `docker compose -f docker/docker-compose.yaml up -d`.
+
+The container will seed the database, calculate similrity matrix and serve API using FastAPI CLI.
 
 ## How to play with API
 Open browser and go to `http://localhost:8000/docs` to use interactive API docs (from swagger UI).
